@@ -1,0 +1,18 @@
+import sys
+from PyQt6.QtWidgets import QApplication
+from src.AudioSchedulerGUI import MainWindow
+
+
+class MainApp:
+    def __init__(self):
+        self.app = QApplication(sys.argv)
+        self.window = MainWindow()
+
+    def start(self):
+        self.window.show()
+        self.app.exec()
+
+
+if __name__ == "__main__":
+    app = MainApp()
+    app.start()
