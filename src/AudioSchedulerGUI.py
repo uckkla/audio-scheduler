@@ -3,6 +3,7 @@ from PyQt6.QtGui import QPixmap, QPalette, QColor
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QVBoxLayout, QWidget, QMenu, QHBoxLayout, \
     QGridLayout, QStackedLayout, QPushButton, QTimeEdit, QListWidget, QMessageBox, QFileDialog
 
+from src.AudioPlayer import PlayAudio, StopAudio
 from src.Scheduler import Scheduler
 
 
@@ -67,13 +68,25 @@ class MainWindow(QMainWindow):
         # Check if user inputted link and correct times
         if audioPath and endTime > startTime:
             self.scheduleList.addItem(f"{audioPath} from {startTime} to {endTime}")
-            self.scheduler.AddVideo(audioPath, startTime, endTime)
+            self.scheduler.AddAudio(audioPath, startTime, endTime)
             self.linkEntry.clear()
         else:
+            StopAudio()
             QMessageBox.critical(self, "Invalid Input", "Please enter a valid youtube link and time.")
 
     def RemoveVideo(self):
-        self.scheduleList.takeItem(self.scheduleList.currentRow())
+        print(self.scheduleList.currentRow())
+        item = self.scheduleList.takeItem(self.scheduleList.currentRow())
+
+        # Separate info from schedule list so it can be passed
+        splitStr = item.text().split(" from ")
+        audioPath = splitStr[0]
+        timeRange = splitStr[1]
+        startTime, endTime = timeRange.split(" to ")
+
+        self.scheduler.RemoveAudio(audioPath, startTime, endTime)
+
+        print(item.text())
 
     def SelectMP3(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Select MP3 File", "", "MP3 Files (*.mp3)")
