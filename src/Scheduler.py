@@ -1,6 +1,6 @@
 import threading
 import time
-from src.AudioPlayer import AudioPlayer
+from src.AudioPlayer import PlayAudio, StopAudio
 from mutagen.mp3 import MP3
 
 
@@ -8,14 +8,18 @@ class Scheduler:
     def __init__(self):
         self.scheduledAudios = {}
 
-    def AddVideo(self, audioPath, startTime, endTime):
+    def AddAudio(self, audioPath, startTime, endTime):
         time = (startTime, endTime)
         if time not in self.scheduledAudios:
             self.scheduledAudios[time] = [audioPath]
         else:
             self.scheduledAudios[time].append(audioPath)
 
-    #checkSchedule will always need to be checking for next songs, so needs to be on separate thread
+    def RemoveAudio(self, audioPath, startTime, endTime):
+        time = (startTime, endTime)
+        self.scheduledAudios[time].remove(audioPath)
+
+    # checkSchedule will always need to be checking for next songs, so needs to be on separate thread
     def startBackgroundTask(self):
         thread = threading.Thread(target=self.checkSchedule, daemon=True)
         thread.start()
@@ -27,7 +31,7 @@ class Scheduler:
             for (startTime, endTime), audios in list(self.scheduledAudios.items()):
                 if startTime <= currentTime <= endTime:
                     for audioPath in audios:
-                        AudioPlayer.PlayAudio(audioPath)
+                        PlayAudio(audioPath)
 
             # Update the schedule every minute
             time.sleep(10)
