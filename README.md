@@ -13,8 +13,10 @@ It currently supports local MP3 files, but will later work for YouTube links as 
 ## Installation Guide
 Clone the repository using git
 
-`https://github.com/uckkla/audio-scheduler.git
-cd audio-scheduler`
+```
+https://github.com/uckkla/audio-scheduler.git
+cd audio-scheduler
+```
 
 Install requirements
 
