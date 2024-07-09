@@ -40,15 +40,18 @@ class MainWindow(QMainWindow):
         selectionLayout.addWidget(self.mp3Button)
         mainLayout.addLayout(selectionLayout)
 
-        # Schedule/Remove button
+        # Schedule/Stop/Remove button
         buttonLayout = QHBoxLayout()
         scheduleButton = QPushButton("Schedule")
+        stopButton = QPushButton("Stop")
         removeButton = QPushButton("Remove")
 
         scheduleButton.clicked.connect(self.ScheduleVideo)
+        stopButton.clicked.connect(StopAudio)
         removeButton.clicked.connect(self.RemoveVideo)
 
         buttonLayout.addWidget(scheduleButton)
+        buttonLayout.addWidget(stopButton)
         buttonLayout.addWidget(removeButton)
         mainLayout.addLayout(buttonLayout)
 
@@ -71,11 +74,9 @@ class MainWindow(QMainWindow):
             self.scheduler.AddAudio(audioPath, startTime, endTime)
             self.linkEntry.clear()
         else:
-            StopAudio()
             QMessageBox.critical(self, "Invalid Input", "Please enter a valid youtube link and time.")
 
     def RemoveVideo(self):
-        print(self.scheduleList.currentRow())
         item = self.scheduleList.takeItem(self.scheduleList.currentRow())
 
         # Separate info from schedule list so it can be passed
