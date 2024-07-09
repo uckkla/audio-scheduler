@@ -7,10 +7,18 @@ from threading import Event
 
 
 class Scheduler:
+    """
+    scheduledAudios (dictionary): stores all audios that exist
+    audioQueue (queue): stores what audios to be played next
+    playedAudios (set): stores what songs have been played before
+    """
     def __init__(self):
+
         self.scheduledAudios = {}
         self.audioQueue = deque()
         self.currentAudio = None
+        # Stores all audios that have been previously played
+        self.playedAudios = set()
         # Required for instantly starting next audio if current is removed
         self.stopEvent = threading.Event()
 
@@ -28,6 +36,8 @@ class Scheduler:
         if audioPath in self.audioQueue:
             self.audioQueue.remove(audioPath)
         # Stop audio if current one is same as removed
+        if audioPath in self.playedAudios:
+            self.playedAudios.remove(audioPath)
         if audioPath == self.currentAudio:
             StopAudio()
             self.currentAudio = None
@@ -47,17 +57,21 @@ class Scheduler:
             for (startTime, endTime), audios in list(self.scheduledAudios.items()):
                 if startTime <= currentTime <= endTime:
                     for audioPath in audios:
-                        self.audioQueue.append(audioPath)
+                        # Will only play old audios when none are left to play
+                        if audioPath not in self.playedAudios:
+                            self.audioQueue.append(audioPath)
+                            self.playedAudios.add(audioPath)
             # Play new audio and wait until it finishes
             if self.audioQueue:
                 print(self.audioQueue)
                 self.currentAudio = self.audioQueue.popleft()
                 StopAudio()
                 PlayAudio(self.currentAudio)
-                # Update the schedule every minute
+                # Update schedule every minute
                 sleepTime = self.getMP3Length(self.currentAudio)
                 self.stopEvent.wait(timeout=sleepTime)
             else:
+                self.playedAudios.clear()
                 time.sleep(1)
 
     def getMP3Length(self, audioPath):
