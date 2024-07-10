@@ -15,7 +15,7 @@ It currently supports local MP3 files, but will later work for YouTube links as 
 Clone the repository using git
 
 ```
-https://github.com/uckkla/audio-scheduler.git
+git clone https://github.com/uckkla/audio-scheduler.git
 cd audio-scheduler
 ```
 
