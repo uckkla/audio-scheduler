@@ -1,9 +1,7 @@
-from PyQt6.QtCore import QSize, Qt, QTime
-from PyQt6.QtGui import QPixmap, QPalette, QColor
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QVBoxLayout, QWidget, QMenu, QHBoxLayout, \
-    QGridLayout, QStackedLayout, QPushButton, QTimeEdit, QListWidget, QMessageBox, QFileDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLineEdit, QVBoxLayout, QWidget, QMenu, QHBoxLayout, \
+    QPushButton, QTimeEdit, QListWidget, QMessageBox, QFileDialog
 
-from src.AudioPlayer import PlayAudio, StopAudio
+from src.AudioPlayer import playAudio, stopAudio
 from src.Scheduler import Scheduler
 
 
@@ -34,7 +32,7 @@ class MainWindow(QMainWindow):
         self.linkEntry.setPlaceholderText("Enter YouTube link or MP3")
         self.mp3Button = QPushButton("Select MP3")
 
-        self.mp3Button.clicked.connect(self.SelectMP3)
+        self.mp3Button.clicked.connect(self.selectMP3)
 
         selectionLayout.addWidget(self.linkEntry)
         selectionLayout.addWidget(self.mp3Button)
@@ -46,9 +44,9 @@ class MainWindow(QMainWindow):
         stopButton = QPushButton("Stop")
         removeButton = QPushButton("Remove")
 
-        scheduleButton.clicked.connect(self.ScheduleVideo)
-        stopButton.clicked.connect(StopAudio)
-        removeButton.clicked.connect(self.RemoveVideo)
+        scheduleButton.clicked.connect(self.scheduleVideo)
+        stopButton.clicked.connect(stopAudio)
+        removeButton.clicked.connect(self.removeVideo)
 
         buttonLayout.addWidget(scheduleButton)
         buttonLayout.addWidget(stopButton)
@@ -59,11 +57,24 @@ class MainWindow(QMainWindow):
         self.scheduleList = QListWidget()
         mainLayout.addWidget(self.scheduleList)
 
+        # Save/Load button
+        dataLayout = QHBoxLayout()
+        saveButton = QPushButton("Save")
+        loadButton = QPushButton("Load")
+
+        saveButton.clicked.connect(self.saveSchedule)
+        loadButton.clicked.connect(self.loadSchedule)
+
+        dataLayout.addWidget(saveButton)
+        dataLayout.addWidget(loadButton)
+        mainLayout.addLayout(dataLayout)
+
+
         # Starts the scheduler
         self.scheduler = Scheduler()
         self.scheduler.startBackgroundTask()
 
-    def ScheduleVideo(self):
+    def scheduleVideo(self):
         startTime = self.startTimeEdit.time().toString("HH:mm")
         endTime = self.endTimeEdit.time().toString("HH:mm")
         audioPath = self.linkEntry.text()
@@ -71,12 +82,12 @@ class MainWindow(QMainWindow):
         # Check if user inputted link and correct times
         if audioPath and endTime > startTime:
             self.scheduleList.addItem(f"{audioPath} from {startTime} to {endTime}")
-            self.scheduler.AddAudio(audioPath, startTime, endTime)
+            self.scheduler.addAudio(audioPath, startTime, endTime)
             self.linkEntry.clear()
         else:
             QMessageBox.critical(self, "Invalid Input", "Please enter a valid youtube link and time.")
 
-    def RemoveVideo(self):
+    def removeVideo(self):
         item = self.scheduleList.takeItem(self.scheduleList.currentRow())
 
         # Separate info from schedule list so it can be passed
@@ -85,11 +96,31 @@ class MainWindow(QMainWindow):
         timeRange = splitStr[1]
         startTime, endTime = timeRange.split(" to ")
 
-        self.scheduler.RemoveAudio(audioPath, startTime, endTime)
+        self.scheduler.removeAudio(audioPath, startTime, endTime)
 
         print(item.text())
 
-    def SelectMP3(self):
+    def saveSchedule(self):
+        print("test1")
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save Schedule", "", "JSON Files (*.json)")
+        print("test2")
+        if fileName:
+            self.scheduler.saveSchedule(fileName)
+            print("test3")
+
+    def loadSchedule(self):
+        fileName, _ = QFileDialog.getOpenFileName(self, "Select Schedule", "", "JSON Files (*.json)")
+        if fileName:
+            self.scheduler.loadSchedule(fileName)
+            self.refreshScheduleList()
+
+    def refreshScheduleList(self):
+        self.scheduleList.clear()
+        for (startTime, endTime), audios in self.scheduler.getScheduledAudios().items():
+            for audioPath in audios:
+                self.scheduleList.addItem(f"{audioPath} from {startTime} to {endTime}")
+
+    def selectMP3(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Select MP3 File", "", "MP3 Files (*.mp3)")
         if fileName:
             self.linkEntry.setText(fileName)

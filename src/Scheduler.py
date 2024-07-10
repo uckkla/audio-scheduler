@@ -1,9 +1,10 @@
+import ast
+import json
 import threading
 import time
-from src.AudioPlayer import PlayAudio, StopAudio
+from src.AudioPlayer import playAudio, stopAudio
 from mutagen.mp3 import MP3
 from collections import deque
-from threading import Event
 
 
 class Scheduler:
@@ -22,14 +23,14 @@ class Scheduler:
         # Required for instantly starting next audio if current is removed
         self.stopEvent = threading.Event()
 
-    def AddAudio(self, audioPath, startTime, endTime):
+    def addAudio(self, audioPath, startTime, endTime):
         time = (startTime, endTime)
         if time not in self.scheduledAudios:
             self.scheduledAudios[time] = [audioPath]
         else:
             self.scheduledAudios[time].append(audioPath)
 
-    def RemoveAudio(self, audioPath, startTime, endTime):
+    def removeAudio(self, audioPath, startTime, endTime):
         time = (startTime, endTime)
         self.scheduledAudios[time].remove(audioPath)
         # Remove audio from queue
@@ -39,9 +40,24 @@ class Scheduler:
         if audioPath in self.playedAudios:
             self.playedAudios.remove(audioPath)
         if audioPath == self.currentAudio:
-            StopAudio()
+            stopAudio()
             self.currentAudio = None
             self.stopEvent.set()
+
+    def saveSchedule(self, fileName):
+        # Need to convert dict keys to string - json does not support tuple keys
+        scheduledAudiosString = {str(key): value for key, value in self.scheduledAudios.items()}
+        with open(fileName, "w") as file:
+            json.dump(scheduledAudiosString, file, indent=4)
+        print(f"Schedule saved to {fileName}")
+
+    def loadSchedule(self, fileName):
+        with open(fileName, "r") as file:
+            scheduleData = json.load(file)
+            self.scheduledAudios = {ast.literal_eval(key): value for key, value in scheduleData.items()}
+
+        #self.scheduledAudios = scheduleData.get("scheduledAudios", {})
+        print(f"Schedule loaded from {fileName}")
 
     # checkSchedule will always need to be checking for next songs, so needs to be on separate thread
     def startBackgroundTask(self):
@@ -65,8 +81,8 @@ class Scheduler:
             if self.audioQueue:
                 print(self.audioQueue)
                 self.currentAudio = self.audioQueue.popleft()
-                StopAudio()
-                PlayAudio(self.currentAudio)
+                stopAudio()
+                playAudio(self.currentAudio)
                 # Update schedule every minute
                 sleepTime = self.getMP3Length(self.currentAudio)
                 self.stopEvent.wait(timeout=sleepTime)
@@ -77,3 +93,7 @@ class Scheduler:
     def getMP3Length(self, audioPath):
         audio = MP3(audioPath)
         return round(audio.info.length)
+
+    # Getter needed for loading audios onto schedule list
+    def getScheduledAudios(self):
+        return self.scheduledAudios
