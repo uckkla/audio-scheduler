@@ -9,6 +9,7 @@ It currently supports local MP3 files, but will later work for YouTube links as 
 - **Schedule Audio Playback**: Easily schedule MP3 files to play at the times chosen up to a certain time.
 - **Audio Control**: Can schedule, stop, and remove audio from the schedule dynamically.
 - **User-Friendly Interface**: Uses a simple GUI made with PyQt6 for managing the schedule.
+- **Save/Load Schedule**: Option to save a schedule as a JSON and load when needed.
 
 ## Installation Guide
 Clone the repository using git
@@ -20,11 +21,15 @@ cd audio-scheduler
 
 Install requirements
 
-`pip install -r requirements.txt`
+```
+pip install -r requirements.txt
+```
 
 Run Program
 
-`python3 main.py`
+```
+python3 main.py
+```
 
 ## KNOWN ISSUE
 There is a bug with pydub where it fails to load the MP3 file due to having denied permissions. If so, navigate to the playback.py package within pydub and add `f.close` in the `_play_with_ffplay` function as shown:
