@@ -4,6 +4,9 @@
 This project is an audio scheduler application that allows users to schedule and play audio files at specified times.
 It currently supports local MP3 files, but will later work for YouTube links as well.
 
+![image](https://github.com/uckkla/audio-scheduler/assets/135323891/1b6eb83a-676f-472e-adac-fa580390dae7)
+
+
 ## Features
 - **Audio Queue**: Program correctly places each audio onto a queue, and will only repeat previous audios when every audio has been played.
 - **Schedule Audio Playback**: Easily schedule MP3 files to play at the times chosen up to a certain time.
