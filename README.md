@@ -31,6 +31,7 @@ pip install -r requirements.txt
 Run Program
 
 ```
+cd src
 python3 main.py
 ```
 
