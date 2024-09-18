@@ -2,7 +2,7 @@
 
 ## Overview
 This project is an audio scheduler application that allows users to schedule and play audio files at specified times.
-It currently supports local MP3 files, but will later work for YouTube links as well.
+It currently supports both local MP3 files and YouTube links.
 
 ![image](https://github.com/uckkla/audio-scheduler/assets/135323891/1b6eb83a-676f-472e-adac-fa580390dae7)
 
@@ -28,6 +28,11 @@ Install requirements
 pip install -r requirements.txt
 ```
 
+Install VLC 3.0.21 or greater (Required for playing YT videos)
+```
+https://get.videolan.org/vlc/3.0.21/win64/vlc-3.0.21-win64.exe
+```
+
 Run Program
 
 ```
@@ -46,3 +51,7 @@ def _play_with_ffplay(seg):
         seg.export(f.name, "wav")
         subprocess.call([PLAYER, "-nodisp", "-autoexit", "-hide_banner", f.name])
 ```
+
+## TODO
+- Add a volume slider to adjust audio volume.
+- Fully implement stop/continue audio playing option.
