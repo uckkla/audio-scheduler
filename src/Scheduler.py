@@ -2,7 +2,7 @@ import ast
 import json
 import threading
 import time
-from src.AudioPlayer import playAudio, stopAudio
+from src.AudioPlayer import playAudio, stopAudio, getYouTubeInfo
 from mutagen.mp3 import MP3
 from collections import deque
 
@@ -91,8 +91,11 @@ class Scheduler:
                 time.sleep(1)
 
     def getMP3Length(self, audioPath):
-        audio = MP3(audioPath)
-        return round(audio.info.length)
+        if audioPath.startswith("https://"):
+            return round(getYouTubeInfo(audioPath)['duration'])
+        else:
+            audio = MP3(audioPath)
+            return round(audio.info.length)
 
     # Getter needed for loading audios onto schedule list
     def getScheduledAudios(self):
